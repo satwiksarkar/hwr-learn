@@ -7,6 +7,9 @@ on:
     branches: [ master, main ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     name: Build Debug APK
@@ -39,9 +42,31 @@ jobs:
           cd android
           ./gradlew assembleDebug --stacktrace
 
-      - name: Upload Debug APK
+      - name: Rename APK for Distribution
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk HWR-LEARN-v1.0.0.apk
+
+      - name: Upload Debug APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: HWR-LEARN-app-debug
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: HWR-LEARN-v1.0.0.apk
           if-no-files-found: error
+
+      - name: Create GitHub Release with APK
+        uses: softprops/action-gh-release@v2
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+        with:
+          tag_name: v1.0.0
+          name: "HWR-LEARN v1.0.0 (Android Full Touch Screen App)"
+          body: |
+            ### HWR-LEARN Android (.apk)
+            - 100% Offline Touch Screen Handwriting Recognition App
+            - High-performance C99 engine running natively on ARM64 / ARMv7 / x86_64 via JNI
+            - Lined paper canvas, smooth touch drawing, undo/clear, and interactive on-the-fly teaching
+            
+            **Installation:**
+            1. Download `HWR-LEARN-v1.0.0.apk` below on your Android phone.
+            2. Tap the downloaded file and select **Install**.
+          files: HWR-LEARN-v1.0.0.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
