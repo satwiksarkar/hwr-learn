@@ -63,8 +63,5 @@ jobs:
             1. Download `HWR-LEARN-v1.1.0.apk` below on your Android phone.
             2. Tap the downloaded file and select **Install / Update**.
           files: HWR-LEARN-v1.1.0.apk
-            1. Download `HWR-LEARN-v1.0.0.apk` below on your Android phone.
-            2. Tap the downloaded file and select **Install**.
-          files: HWR-LEARN-v1.0.0.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
