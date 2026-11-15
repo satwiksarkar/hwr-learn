@@ -18,40 +18,33 @@ This directory contains the complete native Android application project for **HW
 
 ---
 
-## 2. How to Build the APK
+## 2. Download and Install the APK
 
-### Option A: Using Android Studio (Recommended on PC/Mac/Linux)
-1. Open **Android Studio**.
-2. Select **File > Open** and choose the `android/` folder:
-   `c:\8086\hand written text recognisation\android`
-3. Android Studio will automatically sync Gradle and detect the C++ CMake project.
-4. Click **Build > Build Bundle(s) / APK(s) > Build APK(s)** (or press `Ctrl + F9`).
-5. Your output `.apk` will be generated at:
-   `android/app/build/outputs/apk/debug/app-debug.apk`
-6. Transfer `app-debug.apk` to your phone and tap it to install!
+### Direct Download to Your Phone (Easiest)
+1. Open this link directly on your Android phone's browser:
+   **[HWR-LEARN v1.0.0 Release](https://github.com/satwiksarkar/hwr-learn/releases/tag/v1.0.0)**
+2. Tap **`HWR-LEARN-v1.0.0.apk`** to download it.
+3. Tap the downloaded file in your notification bar and select **Install**.
 
 ---
 
-### Option B: Building Directly on Your Android Phone via Termux
-You can compile the APK directly on your phone without needing a computer:
-1. Open **Termux** on your phone.
-2. Install OpenJDK and Gradle:
-   ```bash
-   pkg update
-   pkg install openjdk-17 gradle
-   ```
-3. Navigate to the `android/` directory:
-   ```bash
-   cd ~/storage/downloads/hand-written-text-recognisation/android
-   ```
-4. Build the debug APK:
-   ```bash
-   gradle assembleDebug
-   ```
-5. Install the resulting APK:
-   ```bash
-   termux-open app/build/outputs/apk/debug/app-debug.apk
-   ```
+### Option B: Download via Termux on Your Phone
+If you are inside Termux on your phone:
+```bash
+# 1. Download the APK directly
+curl -LO https://github.com/satwiksarkar/hwr-learn/releases/download/v1.0.0/HWR-LEARN-v1.0.0.apk
+
+# 2. Trigger the Android package installer
+termux-open HWR-LEARN-v1.0.0.apk
+```
+
+---
+
+### Option C: Sideload from PC via ADB
+If your phone is connected to your PC with USB debugging enabled:
+```powershell
+adb install dist/HWR-LEARN-v1.0.0.apk
+```
 
 ---
 
