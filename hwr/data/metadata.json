@@ -1,0 +1,14 @@
+{
+  "seeds_count": 4369,
+  "prototypes_count": 134,
+  "perceptron_classes": 62,
+  "default_case_t": 68,
+  "default_abs_t": 42,
+  "margin_x": 2,
+  "margin_y": 16,
+  "descender_threshold_percent": 12,
+  "bank_raw_override_dist": 14,
+  "bank_scale_num": 5,
+  "bank_scale_den": 8,
+  "bank_trust_bonus": 3
+}
