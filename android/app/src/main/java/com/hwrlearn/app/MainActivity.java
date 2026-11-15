@@ -4,12 +4,15 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.media.MediaScannerConnection;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.View;
 import android.widget.*;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -29,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
     private Button btnRead;
     private Button btnClear;
     private Button btnUndo;
+    private Button btnSave;
     private Button btnAppend;
     private Button btnShare;
     private Button btnReset;
@@ -60,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
         btnRead = findViewById(R.id.btnRead);
         btnClear = findViewById(R.id.btnClear);
         btnUndo = findViewById(R.id.btnUndo);
+        btnSave = findViewById(R.id.btnSave);
         btnAppend = findViewById(R.id.btnAppend);
         btnShare = findViewById(R.id.btnShare);
         btnReset = findViewById(R.id.btnReset);
@@ -89,7 +94,8 @@ public class MainActivity extends AppCompatActivity {
             tvStatus.setText("Canvas cleared. Write natural strokes above.");
         });
         btnUndo.setOnClickListener(v -> drawingView.undoLastStroke());
-        btnAppend.setOnClickListener(v -> showAppendDialog());
+        btnSave.setOnClickListener(v -> showFileOperationDialog(false));
+        btnAppend.setOnClickListener(v -> showFileOperationDialog(true));
         btnShare.setOnClickListener(v -> showShareDialog());
         btnReset.setOnClickListener(v -> showResetDialog());
 
@@ -130,6 +136,7 @@ public class MainActivity extends AppCompatActivity {
 
                     Button pill = new Button(this);
                     pill.setText(ch);
+                    pill.setAllCaps(false); // CRITICAL: preserve exact lowercase/uppercase case!
                     pill.setTextSize(20);
                     pill.setPadding(24, 12, 24, 12);
                     LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
@@ -151,7 +158,7 @@ public class MainActivity extends AppCompatActivity {
                     pill.setOnClickListener(btn -> showTop3Dialog(glyphIdx));
                     llGlyphsContainer.addView(pill);
                 }
-                tvStatus.setText("Recognized: \"" + fullText + "\" (Tap letter to teach; or Append/Share)");
+                tvStatus.setText("Recognized: \"" + fullText + "\" (Tap letter to teach; or Save/Append)");
             } else {
                 tvStatus.setText("No characters detected. Write on the canvas above.");
             }
@@ -188,6 +195,7 @@ public class MainActivity extends AppCompatActivity {
 
             Button btnCand = new Button(this);
             btnCand.setText(String.format("Option %d:  '%s'  (Confidence: %.0f%%)", i + 1, ch, conf));
+            btnCand.setAllCaps(false); // Preserve exact letter case
             btnCand.setOnClickListener(v -> teachCharacter(glyphIdx, ch.charAt(0)));
             layout.addView(btnCand);
         }
@@ -203,6 +211,7 @@ public class MainActivity extends AppCompatActivity {
 
         Button btnTeach = new Button(this);
         btnTeach.setText("Reinforce Learning in SQLite");
+        btnTeach.setAllCaps(false);
         btnTeach.setOnClickListener(v -> {
             String txt = etCustom.getText().toString().trim();
             if (!txt.isEmpty()) {
@@ -259,24 +268,56 @@ public class MainActivity extends AppCompatActivity {
                 .show();
     }
 
-    private void showAppendDialog() {
+    private File getPublicHwrDir() {
+        // 1. Primary location: phone's public Downloads/HWR-LEARN/ (directly visible in Files / Downloads app!)
+        File downloads = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        if (downloads != null) {
+            File hwrDir = new File(downloads, "HWR-LEARN");
+            if (!hwrDir.exists()) hwrDir.mkdirs();
+            if (hwrDir.exists() && hwrDir.canWrite()) return hwrDir;
+        }
+
+        // 2. Secondary location: phone's public Documents/HWR-LEARN/
+        File documents = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
+        if (documents != null) {
+            File hwrDir = new File(documents, "HWR-LEARN");
+            if (!hwrDir.exists()) hwrDir.mkdirs();
+            if (hwrDir.exists() && hwrDir.canWrite()) return hwrDir;
+        }
+
+        // 3. Fallback: app external documents directory
+        File extDocs = getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
+        if (extDocs != null && !extDocs.exists()) extDocs.mkdirs();
+        if (extDocs != null && extDocs.exists()) return extDocs;
+
+        return getFilesDir();
+    }
+
+    private void showFileOperationDialog(boolean defaultAppend) {
         if (lastRecognizedText.trim().isEmpty()) {
-            Toast.makeText(this, "No recognized text to append. Tap READ first.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "No recognized text to save. Tap READ first.", Toast.LENGTH_SHORT).show();
             return;
         }
 
+        File targetDir = getPublicHwrDir();
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Append to .txt File");
+        builder.setTitle(defaultAppend ? "Append to .txt File" : "Save as New .txt File");
 
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.setPadding(40, 20, 40, 20);
 
         TextView tvInfo = new TextView(this);
-        tvInfo.setText("Text to append:\n\"" + lastRecognizedText + "\"\n");
+        tvInfo.setText("Recognized text:\n\"" + lastRecognizedText + "\"\n");
         tvInfo.setTextSize(14);
         tvInfo.setTextColor(0xFF1E293B);
         layout.addView(tvInfo);
+
+        TextView tvPathInfo = new TextView(this);
+        tvPathInfo.setText("Saved in phone folder:\n" + targetDir.getAbsolutePath() + "\n");
+        tvPathInfo.setTextSize(12);
+        tvPathInfo.setTextColor(0xFF0284C7);
+        layout.addView(tvPathInfo);
 
         TextView tvFileLabel = new TextView(this);
         tvFileLabel.setText("File name (.txt):");
@@ -286,33 +327,45 @@ public class MainActivity extends AppCompatActivity {
         etFileName.setText("hwr_notes.txt");
         layout.addView(etFileName);
 
+        RadioGroup rgMode = new RadioGroup(this);
+        RadioButton rbSave = new RadioButton(this);
+        rbSave.setText("Save (Overwrite / Create new)");
+        RadioButton rbAppend = new RadioButton(this);
+        rbAppend.setText("Append to bottom of existing file");
+        rgMode.addView(rbSave);
+        rgMode.addView(rbAppend);
+        if (defaultAppend) {
+            rbAppend.setChecked(true);
+        } else {
+            rbSave.setChecked(true);
+        }
+        layout.addView(rgMode);
+
         CheckBox cbBackup = new CheckBox(this);
         cbBackup.setText("Create safety backup (.bak) before writing");
         cbBackup.setChecked(true);
         layout.addView(cbBackup);
 
         builder.setView(layout);
-        builder.setPositiveButton("Append to File", (dialog, which) -> {
+        builder.setPositiveButton(defaultAppend ? "Append" : "Save", (dialog, which) -> {
             String fileName = etFileName.getText().toString().trim();
             if (fileName.isEmpty()) fileName = "hwr_notes.txt";
             if (!fileName.endsWith(".txt")) fileName += ".txt";
 
+            boolean isAppendMode = rbAppend.isChecked();
             boolean makeBackup = cbBackup.isChecked();
-            appendToFile(fileName, lastRecognizedText, makeBackup);
+            executeFileWrite(targetDir, fileName, lastRecognizedText, isAppendMode, makeBackup);
         });
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
         builder.show();
     }
 
-    private void appendToFile(String fileName, String text, boolean makeBackup) {
+    private void executeFileWrite(File dir, String fileName, String text, boolean isAppend, boolean makeBackup) {
         try {
-            File dir = getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
-            if (dir == null) dir = getFilesDir();
             if (!dir.exists()) dir.mkdirs();
-
             File targetFile = new File(dir, fileName);
 
-            // Create .bak backup if target file already exists and backup is requested
+            // 1. Create .bak backup if target file already exists and backup is requested
             if (makeBackup && targetFile.exists() && targetFile.length() > 0) {
                 File backupFile = new File(dir, fileName + ".bak");
                 FileInputStream in = new FileInputStream(targetFile);
@@ -326,22 +379,64 @@ public class MainActivity extends AppCompatActivity {
                 out.close();
             }
 
-            // Append text with newline using UTF-8
-            FileOutputStream fos = new FileOutputStream(targetFile, true);
+            // 2. Write or Append text with newline using UTF-8
+            FileOutputStream fos = new FileOutputStream(targetFile, isAppend);
             OutputStreamWriter writer = new OutputStreamWriter(fos, StandardCharsets.UTF_8);
             writer.write(text + "\n");
             writer.flush();
             writer.close();
 
-            // Record in SQLite documents table
+            // 3. Notify Android MediaScanner so phone's Files / Downloads app sees it immediately
+            MediaScannerConnection.scanFile(this,
+                    new String[]{targetFile.getAbsolutePath()},
+                    new String[]{"text/plain"}, null);
+
+            // 4. Record in SQLite documents table
             hwrDatabase.insertDocument(fileName, text);
 
-            String msg = "Appended to " + fileName + (makeBackup ? " (backup created: " + fileName + ".bak)" : "");
-            tvStatus.setText(msg);
-            Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+            // 5. Show Success Dialog with direct "Open File" and "Share File" buttons!
+            showFileSuccessDialog(targetFile, isAppend, makeBackup);
         } catch (Exception e) {
-            Toast.makeText(this, "File error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Write error: " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
+    }
+
+    private void showFileSuccessDialog(File file, boolean wasAppended, boolean madeBackup) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(wasAppended ? "Appended Successfully" : "Saved Successfully");
+
+        String msg = "File saved to your phone at:\n" + file.getAbsolutePath() + "\n\n" +
+                (madeBackup ? "Safety backup created:\n" + file.getName() + ".bak\n\n" : "") +
+                "You can find this file in your phone's 'Files' or 'Downloads' app under 'HWR-LEARN'.";
+        builder.setMessage(msg);
+
+        builder.setPositiveButton("Open File", (dialog, which) -> {
+            try {
+                Uri uri = FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", file);
+                Intent viewIntent = new Intent(Intent.ACTION_VIEW);
+                viewIntent.setDataAndType(uri, "text/plain");
+                viewIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                startActivity(Intent.createChooser(viewIntent, "Open with..."));
+            } catch (Exception e) {
+                Toast.makeText(this, "Unable to open viewer: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        builder.setNeutralButton("Share File", (dialog, which) -> {
+            try {
+                Uri uri = FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", file);
+                Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                shareIntent.setType("text/plain");
+                shareIntent.putExtra(Intent.EXTRA_STREAM, uri);
+                shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                startActivity(Intent.createChooser(shareIntent, "Share .txt file via"));
+            } catch (Exception e) {
+                Toast.makeText(this, "Share error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        builder.setNegativeButton("Close", (dialog, which) -> dialog.dismiss());
+        builder.show();
     }
 
     private void showShareDialog() {

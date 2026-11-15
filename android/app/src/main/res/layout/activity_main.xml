@@ -54,7 +54,7 @@
                 android:layout_marginStart="8dp" />
         </LinearLayout>
 
-        <!-- Row 2: Storage, File Append, Reset & Share -->
+        <!-- Row 2: Save, Append, Reset, Share & Badge -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -63,11 +63,21 @@
             android:layout_marginTop="4dp">
 
             <Button
+                android:id="@+id/btnSave"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="Save .txt"
+                android:textSize="12sp"
+                android:backgroundTint="#0284C7"
+                android:textColor="#FFFFFF" />
+
+            <Button
                 android:id="@+id/btnAppend"
                 android:layout_width="wrap_content"
                 android:layout_height="36dp"
                 android:text="Append .txt"
                 android:textSize="12sp"
+                android:layout_marginStart="4dp"
                 android:backgroundTint="#059669"
                 android:textColor="#FFFFFF" />
 
@@ -77,7 +87,7 @@
                 android:layout_height="36dp"
                 android:text="Share"
                 android:textSize="12sp"
-                android:layout_marginStart="6dp"
+                android:layout_marginStart="4dp"
                 android:backgroundTint="#475569"
                 android:textColor="#FFFFFF" />
 
@@ -87,7 +97,7 @@
                 android:layout_height="36dp"
                 android:text="Reset"
                 android:textSize="12sp"
-                android:layout_marginStart="6dp"
+                android:layout_marginStart="4dp"
                 android:backgroundTint="#DC2626"
                 android:textColor="#FFFFFF" />
 
@@ -99,9 +109,9 @@
                 android:gravity="end|center_vertical"
                 android:text="Taught: 0 in SQLite"
                 android:textColor="#0284C7"
-                android:textSize="12sp"
+                android:textSize="11sp"
                 android:textStyle="bold"
-                android:paddingEnd="4dp" />
+                android:paddingEnd="2dp" />
         </LinearLayout>
     </LinearLayout>
 

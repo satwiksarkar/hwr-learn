@@ -36,32 +36,31 @@ jobs:
           ./gradlew assembleDebug --stacktrace
 
       - name: Rename APK for Distribution
-        run: cp android/app/build/outputs/apk/debug/app-debug.apk HWR-LEARN-v1.1.0.apk
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk HWR-LEARN-v1.2.0.apk
 
       - name: Upload Debug APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: HWR-LEARN-app-debug
-          path: HWR-LEARN-v1.1.0.apk
+          path: HWR-LEARN-v1.2.0.apk
           if-no-files-found: error
 
       - name: Create GitHub Release with APK
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         with:
-          tag_name: v1.1.0
-          name: "HWR-LEARN v1.1.0 (SQLite Persistence, File Append, Reset & Touch Teaching)"
+          tag_name: v1.2.0
+          name: "HWR-LEARN v1.2.0 (Exact Case Display, Save & Append .txt, FileProvider & Direct Downloads)"
           body: |
-            ### HWR-LEARN v1.1.0 Android (.apk)
-            - **SQLite Persistence**: Taught samples are now permanently saved in SQLite (`hwrlearn.db`) and restored automatically every time the app opens.
-            - **Text File Operations**: New **Append .txt** feature with automatic `.bak` backup creation and UTF-8 encoding.
-            - **Reset Learning**: New **Reset** button to wipe taught SQLite samples and restore factory defaults.
-            - **Quick Share & Clipboard**: New **Share** button to copy text and send directly to any messaging/notes app.
-            - **Touch-Optimized Recognition**: Improved bank matching tolerance and perceptron updates for touchscreen handwriting.
+            ### HWR-LEARN v1.2.0 Android (.apk)
+            - **Exact Lowercase / Uppercase Display**: Fixed Android Button auto-capitalization (`textAllCaps=false`). Lowercase recognized characters ('a', 'b', etc.) now properly display in lowercase inside the green/amber pills!
+            - **Save vs Append .txt**: Added distinct **Save .txt** (overwrite/new file) and **Append .txt** (add to bottom) with `.bak` safety backup support.
+            - **Direct Phone Storage (`Downloads/HWR-LEARN/`)**: Files are now saved directly into your phone's public `Downloads/HWR-LEARN/` directory so you can see them immediately in your phone's Files or Downloads app.
+            - **Open & Share File Directly**: After saving, tap **Open File** to open directly in your phone's text editor, or **Share File** to send the `.txt` document to WhatsApp, Gmail, Drive, etc.
             
             **Installation:**
-            1. Download `HWR-LEARN-v1.1.0.apk` below on your Android phone.
+            1. Download `HWR-LEARN-v1.2.0.apk` below on your Android phone.
             2. Tap the downloaded file and select **Install / Update**.
-          files: HWR-LEARN-v1.1.0.apk
+          files: HWR-LEARN-v1.2.0.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
