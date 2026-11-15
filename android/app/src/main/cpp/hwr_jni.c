@@ -123,3 +123,39 @@ Java_com_hwrlearn_app_HwrNative_loadBankSample(JNIEnv *env, jclass clazz, jbyteA
 
     return res;
 }
+
+JNIEXPORT jbyteArray JNICALL
+Java_com_hwrlearn_app_HwrNative_getLastGrid8(JNIEnv *env, jclass clazz) {
+    (void)clazz;
+    const uint8_t* g8 = hwr_get_last_grid8();
+    jbyteArray arr = (*env)->NewByteArray(env, 8);
+    (*env)->SetByteArrayRegion(env, arr, 0, 8, (const jbyte*)g8);
+    return arr;
+}
+
+JNIEXPORT jbyteArray JNICALL
+Java_com_hwrlearn_app_HwrNative_getLastGrid57(JNIEnv *env, jclass clazz) {
+    (void)clazz;
+    const uint8_t* g57 = hwr_get_last_grid57();
+    jbyteArray arr = (*env)->NewByteArray(env, 7);
+    (*env)->SetByteArrayRegion(env, arr, 0, 7, (const jbyte*)g57);
+    return arr;
+}
+
+JNIEXPORT jint JNICALL
+Java_com_hwrlearn_app_HwrNative_getLastAspect(JNIEnv *env, jclass clazz) {
+    (void)env; (void)clazz;
+    return hwr_get_last_aspect();
+}
+
+JNIEXPORT jint JNICALL
+Java_com_hwrlearn_app_HwrNative_getLastFlags(JNIEnv *env, jclass clazz) {
+    (void)env; (void)clazz;
+    return hwr_get_last_flags();
+}
+
+JNIEXPORT jint JNICALL
+Java_com_hwrlearn_app_HwrNative_getBankCount(JNIEnv *env, jclass clazz) {
+    (void)env; (void)clazz;
+    return hwr_get_sample_count();
+}

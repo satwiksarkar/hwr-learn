@@ -3,47 +3,106 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#F1F5F9">
+    android:background="#F8FAFC">
 
-    <!-- Top Toolbar -->
+    <!-- Top Toolbar Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="8dp"
+        android:orientation="vertical"
         android:background="#FFFFFF"
         android:elevation="4dp"
-        android:gravity="center_vertical">
+        android:padding="8dp">
 
-        <Button
-            android:id="@+id/btnRead"
-            android:layout_width="wrap_content"
+        <!-- Row 1: Core Action Controls -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="READ"
-            android:textStyle="bold"
-            android:textColor="#FFFFFF"
-            android:backgroundTint="#2563EB" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
 
-        <Button
-            android:id="@+id/btnClear"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Clear"
-            android:layout_marginStart="6dp" />
+            <Button
+                android:id="@+id/btnRead"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="READ"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF"
+                android:backgroundTint="#2563EB"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp" />
 
-        <Button
-            android:id="@+id/btnUndo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Undo"
-            android:layout_marginStart="6dp" />
+            <Button
+                android:id="@+id/btnClear"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Clear"
+                android:layout_marginStart="6dp" />
 
-        <Spinner
-            android:id="@+id/spMode"
-            android:layout_width="0dp"
+            <Button
+                android:id="@+id/btnUndo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Undo"
+                android:layout_marginStart="6dp" />
+
+            <Spinner
+                android:id="@+id/spMode"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp" />
+        </LinearLayout>
+
+        <!-- Row 2: Storage, File Append, Reset & Share -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginStart="8dp" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="4dp">
+
+            <Button
+                android:id="@+id/btnAppend"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="Append .txt"
+                android:textSize="12sp"
+                android:backgroundTint="#059669"
+                android:textColor="#FFFFFF" />
+
+            <Button
+                android:id="@+id/btnShare"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="Share"
+                android:textSize="12sp"
+                android:layout_marginStart="6dp"
+                android:backgroundTint="#475569"
+                android:textColor="#FFFFFF" />
+
+            <Button
+                android:id="@+id/btnReset"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="Reset"
+                android:textSize="12sp"
+                android:layout_marginStart="6dp"
+                android:backgroundTint="#DC2626"
+                android:textColor="#FFFFFF" />
+
+            <TextView
+                android:id="@+id/tvBankBadge"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="end|center_vertical"
+                android:text="Taught: 0 in SQLite"
+                android:textColor="#0284C7"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:paddingEnd="4dp" />
+        </LinearLayout>
     </LinearLayout>
 
     <!-- Main Touch Drawing Canvas -->
@@ -66,8 +125,8 @@
             android:id="@+id/tvStatus"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Write handwriting with your finger/stylus on the paper above, then tap READ."
-            android:textColor="#64748B"
+            android:text="Write with finger or stylus on canvas above, then tap READ."
+            android:textColor="#334155"
             android:textSize="13sp" />
 
         <HorizontalScrollView

@@ -409,9 +409,11 @@ static void train_perceptron_sample(const uint8_t grid8[8], char target_char, in
 
         if (best_idx == target_idx) break;
 
-        char wrong_char = cls_idx_to_char(best_idx);
-        uint8_t wrong_group = HWR_GRP[(uint8_t)wrong_char];
-        if (target_group != 0xFF && target_group == wrong_group) break;
+        if (max_epochs <= 3) {
+            char wrong_char = cls_idx_to_char(best_idx);
+            uint8_t wrong_group = HWR_GRP[(uint8_t)wrong_char];
+            if (target_group != 0xFF && target_group == wrong_group) break;
+        }
 
         /* UpdW update: target +4, wrong -4, bias +-8 */
         for (int i = 0; i < nact; i++) {
@@ -653,14 +655,14 @@ HWR_API int32_t hwr_predict(HWRResult* out_result) {
                 }
             }
 
-            /* Outright bank override at <= 14 */
-            if (bkd <= 14 && bkc != 0 && mode_ok(g_mode, bkc)) {
+            /* Outright bank override at <= 22 for touchscreen tolerance */
+            if (bkd <= 22 && bkc != 0 && mode_ok(g_mode, bkc)) {
                 best_c = bkc;
             }
 
             gr->final_class = best_c;
-            gr->confidence = (bkd <= 14) ? 98.0f : 85.0f;
-            gr->is_sure = (bkd <= 14 || best_score > -200);
+            gr->confidence = (bkd <= 22) ? 98.0f : 85.0f;
+            gr->is_sure = (bkd <= 22 || best_score > -200);
 
             /* Top 3 selection */
             gr->candidates[0].character = best_c;

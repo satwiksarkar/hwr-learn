@@ -13,4 +13,9 @@ public class HwrNative {
     public static native String predict();
     public static native int teachGlyph(int glyphIdx, char correctChar);
     public static native int loadBankSample(byte[] grid8, byte[] grid57, char label, int aspect, int flags);
+    public static native byte[] getLastGrid8();
+    public static native byte[] getLastGrid57();
+    public static native int getLastAspect();
+    public static native int getLastFlags();
+    public static native int getBankCount();
 }
